@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
+import { checkValidData } from "../utils/validate"
 
 const Login = () => {
-  const handleSubmit = () => {
-    alert("succesfully submitted");
-  };
-  const [isSignIn, setIsSignIn] = useState(true)
+  const [isSignIn, setIsSignIn] = useState(true);
   const showSignup = () => {
-    setIsSignIn(!isSignIn)
+    setIsSignIn(!isSignIn);
+  };
+  const [errorMessage, setErrorMessage] = useState()
+  const email = useRef(null);
+  const password = useRef(null);
+
+  const handleButtonClick = () => {
+    console.log("emaillllll", email.current.value)
+    console.log("passsworddd", password.current.value)
+    const message = checkValidData(email.current.value, password.current.value)
+    setErrorMessage(message)
   }
 
   return (
@@ -16,21 +24,28 @@ const Login = () => {
         <Header />
         <form
           className="absolute bg-black text-white w-1/3 h-1/2 mx-auto right-0 left-0 my-auto top-0 bottom-0 text-center bg-opacity-70"
-          action="submit"
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
         >
-          <h1 className="text-3xl bold m-3">{isSignIn ? "Sign in": "Sign Up"} </h1>
-          {!isSignIn && <div className="h-1/6 my-4">
-            {/* <label htmlFor="password">Password</label> */}
-            <input
-              className="w-4/5 px-2 h-full bg-black bg-opacity-0 text-white border rounded"
-              type="text"
-              placeholder="Enter Name"
-              id="name"
-            />
-          </div> }
+          <h1 className="text-3xl bold m-3">
+            {isSignIn ? "Sign in" : "Sign Up"}{" "}
+          </h1>
+          {!isSignIn && (
+            <div className="h-1/6 my-4">
+              {/* <label htmlFor="password">Password</label> */}
+              <input
+                className="w-4/5 px-2 h-full bg-black bg-opacity-0 text-white border rounded"
+                type="text"
+                placeholder="Enter Name"
+                id="name"
+              />
+            </div>
+          )}
           <div className="h-1/6 my-4">
             {/* <label htmlFor="emailId">Email Address</label> */}
             <input
+              ref={email}
               className="w-4/5 h-full px-2 bg-black bg-opacity-0 text-white border rounded"
               type="text"
               placeholder="Email Address"
@@ -41,15 +56,27 @@ const Login = () => {
           <div className="h-1/6 my-4">
             {/* <label htmlFor="password">Password</label> */}
             <input
+              ref={password}
               className="w-4/5 px-2 h-full bg-black bg-opacity-0 text-white border rounded"
               type="password"
               placeholder="Enter Password"
               id="password"
             />
           </div>
-          <button className="w-4/5 h-1/6 bg-red-600">{isSignIn ? "Sign In" : "Sign Up"}</button>
-          
-          <p className="no-underline hover:underline hover:cursor-pointer" onClick={showSignup}>{isSignIn ? "New to Netflix? Sign Up" : "Already registered !!! Click to sign in"}</p>
+          <div className="text-red-600">{errorMessage}</div>
+          <button
+            onClick={handleButtonClick}
+            className="w-4/5 h-1/6 bg-red-600">
+            {isSignIn ? "Sign In" : "Sign Up"}
+          </button>
+          <p
+            className="no-underline hover:underline hover:cursor-pointer"
+            onClick={showSignup}
+          >
+            {isSignIn
+              ? "New to Netflix? Sign Up"
+              : "Already registered !!! Click to sign in"}
+          </p>ś
         </form>
         <div className="">
           <img
