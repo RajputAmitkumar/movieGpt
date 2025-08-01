@@ -1,5 +1,5 @@
 {
   "projects": {
-    "default": "netflix-gpt-b91c3"
+    "default": "movie-based-gpt"
   }
 }

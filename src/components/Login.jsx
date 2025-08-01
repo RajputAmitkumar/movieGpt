@@ -1,22 +1,67 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
-import { checkValidData } from "../utils/validate"
+import { checkValidData } from "../utils/validate";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../utils/firebase";
 
 const Login = () => {
   const [isSignIn, setIsSignIn] = useState(true);
   const showSignup = () => {
     setIsSignIn(!isSignIn);
   };
-  const [errorMessage, setErrorMessage] = useState()
+  const [errorMessage, setErrorMessage] = useState();
   const email = useRef(null);
   const password = useRef(null);
 
   const handleButtonClick = () => {
-    console.log("emaillllll", email.current.value)
-    console.log("passsworddd", password.current.value)
-    const message = checkValidData(email.current.value, password.current.value)
-    setErrorMessage(message)
-  }
+    console.log("emaillllll", email.current.value);
+    console.log("passsworddd", password.current.value);
+    const message = checkValidData(email.current.value, password.current.value);
+    setErrorMessage(message);
+
+    if (message) return;
+    if (!isSignIn) {
+      //sign up logic 
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          console.log("useruser", user);
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log("errrooorrrrr", errorCode + "=====" + errorMessage);
+          // ..
+          setErrorMessage(errorMessage)
+        });
+    } else {
+      //sign in logic 
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log("signedd suceessss, ",user)
+
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log("sign in errrrrrrrrr", errorCode + "=====" + errorMessage);
+          setErrorMessage(errorMessage)
+        });
+    }
+  };
 
   return (
     <>
@@ -66,7 +111,8 @@ const Login = () => {
           <div className="text-red-600">{errorMessage}</div>
           <button
             onClick={handleButtonClick}
-            className="w-4/5 h-1/6 bg-red-600">
+            className="w-4/5 h-1/6 bg-red-600"
+          >
             {isSignIn ? "Sign In" : "Sign Up"}
           </button>
           <p
@@ -76,7 +122,7 @@ const Login = () => {
             {isSignIn
               ? "New to Netflix? Sign Up"
               : "Already registered !!! Click to sign in"}
-          </p>ś
+          </p>
         </form>
         <div className="">
           <img
