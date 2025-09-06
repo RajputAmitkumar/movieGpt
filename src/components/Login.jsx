@@ -1,17 +1,27 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { checkValidData } from "../utils/validate";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { auth } from "../utils/firebase";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
+import { useNavigate } from "react-router-dom";
+import { updateProfile } from "firebase/auth";
 
 const Login = () => {
+  const dispatch = useDispatch()
   const [isSignIn, setIsSignIn] = useState(true);
   const showSignup = () => {
     setIsSignIn(!isSignIn);
   };
   const [errorMessage, setErrorMessage] = useState();
   const email = useRef(null);
+  const displayName = useRef(null)
   const password = useRef(null);
+  const navigate = useNavigate()
 
   const handleButtonClick = () => {
     console.log("emaillllll", email.current.value);
@@ -21,7 +31,7 @@ const Login = () => {
 
     if (message) return;
     if (!isSignIn) {
-      //sign up logic 
+      //sign up logic
       createUserWithEmailAndPassword(
         auth,
         email.current.value,
@@ -31,17 +41,40 @@ const Login = () => {
           // Signed up
           const user = userCredential.user;
           console.log("useruser", user);
-          // ...
+          updateProfile(auth.currentUser, {
+            displayName: displayName.current.value,
+            photoURL: "https://example.com/jane-q-user/profile.jpg",
+          })
+            .then(() => {
+              // Profile updated!
+              console.log("display name has been set par baadme yaa phele")
+               dispatch(
+                        addUser({
+                          isEmailVerified: user.emailVerified,
+                          email: email,
+                          displayName: displayName,
+                          photoURL: photoURL
+                        })
+                      );
+
+              navigate('/browse')
+            })
+            .catch((error) => {
+              // An error occurred
+              // ...
+            });
+            console.log("user phele print hogaya kya ")
         })
+        
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
           console.log("errrooorrrrr", errorCode + "=====" + errorMessage);
           // ..
-          setErrorMessage(errorMessage)
+          setErrorMessage(errorMessage);
         });
     } else {
-      //sign in logic 
+      //sign in logic
       signInWithEmailAndPassword(
         auth,
         email.current.value,
@@ -50,18 +83,20 @@ const Login = () => {
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
-          console.log("signedd suceessss, ",user)
-
-          // ...
+          console.log("signedd suceessss, ", auth);
+          
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          console.log("sign in errrrrrrrrr", errorCode + "=====" + errorMessage);
-          setErrorMessage(errorMessage)
+          console.log(
+            "sign in errrrrrrrrr",
+            errorCode + "=====" + errorMessage
+          );
+          setErrorMessage(errorMessage);
         });
-    }
-  };
+      }
+    };
 
   return (
     <>
@@ -74,12 +109,13 @@ const Login = () => {
           }}
         >
           <h1 className="text-3xl bold m-3">
-            {isSignIn ? "Sign in" : "Sign Up"}{" "}
+            {isSignIn ? "Sign in" : "Sign Up"}
           </h1>
           {!isSignIn && (
             <div className="h-1/6 my-4">
               {/* <label htmlFor="password">Password</label> */}
               <input
+                ref={ displayName }
                 className="w-4/5 px-2 h-full bg-black bg-opacity-0 text-white border rounded"
                 type="text"
                 placeholder="Enter Name"
